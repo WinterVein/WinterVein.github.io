@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Welcome to SandBlast!!"
+title:  "Welcome to SandTrails!!"
 date:   2024-06-26 15:48:58 -0400
 categories: devlog
 ---
