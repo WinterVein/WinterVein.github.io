@@ -10,5 +10,3 @@ Details of the game will become available as development continues.
 
 We (the devs) can be contacted with questions, feedback, and contributions over email at the following address:
 [salaxios@proton.me](mailto:salaxios@proton.me)
-
-[contact me](mailto:myname@gmail.com)
