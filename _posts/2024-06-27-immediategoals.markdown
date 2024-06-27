@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Immediate Goals"
-date:   2024-06-27 19:50:00 -0400
+date:   2024-06-27 16:00:00 -0400
 categories: devlog
 ---
 Given the long production time of a story driven game, it is important to set immediate goals and work towards each of them. For the early stage of development that we're currently at, we are set on making and releasing a 15-20 minute demo for "Sandblast".
