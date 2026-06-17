@@ -1,53 +1,30 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-#
-# If you need help with YAML syntax, here are some quick references for you:
-# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
-# https://learnxinyminutes.com/docs/yaml/
-#
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
+# Base configs
+baseurl: "https://photography.rampatra.com"
+# baseurl: "" # Comment the above line and uncomment this to test the website locally
+image_fulls_loc: "/images/fulls"
+image_thumbs_loc: "/images/thumbs"
+google_analytics: "UA-46465113-2"
 
-title: Salaxios Studio
-email: salaxios@proton.me
-description: >- # this means to ignore newlines until "baseurl:"
-  Salaxios Game Design
-baseurl: "/" # the subpath of your site, e.g. /blog
-url: "http://www.wintervein.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
+# UI configs
+title: "Photography by Ram Patra"
+subtitle: "See the world through my eyes!"
+author: "Ram Patra"
+header:
+ title: "Photography"
+ subtitle: "by Ram Patra"
+footer:
+ name: "Hey there, my name is Ram"
+ bio: "I am a software developer and a tech aficionado. Love making teeny tiny apps solving tiny problems in life and now learning photography."
+ github: "Want a website like this for yourself for free? Just <a href=\"https://github.com/rampatra/photography\">fork this repo on github</a> ;)"
+web_design: "AJ"
 
-# Build settings
-theme: minima
-plugins:
-  - jekyll-feed
+social_urls:
+  twitter: "https://www.twitter.com/rampatra_"
+  instagram: "https://www.instagram.com/ram_patra"
+  dribbble: "https://dribbble.com/rampatra"
+  linkedin: "https://in.linkedin.com/in/ram-patra"
+  github: "https://www.github.com/rampatra"
 
-# Exclude from processing.
-# The following items will not be processed, by default.
-# Any item listed under the `exclude:` key here will be automatically added to
-# the internal "default list".
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+# Configure which exif data to display
+# Tag is the actual exif tag, icon is a fontawesome icon. Use JSON notation without line breaks
+exif: '[{"tag": "Model", "icon": "fa fa-camera-retro"}, {"tag": "FNumber", "icon": "far fa-dot-circle"}, {"tag": "ExposureTime", "icon": "far fa-clock"}, {"tag": "ISOSpeedRatings", "icon": "fa fa-info-circle"}]'
