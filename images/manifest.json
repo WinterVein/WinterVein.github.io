@@ -1,185 +1,179 @@
 {
   "children": [
     {
-      "type": "folder",
-      "name": "JUNE",
-      "children": [
-        {
-          "type": "image",
-          "name": "R0007291.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007292.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007293.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007298.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007301.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007305.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007312.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007316.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007318.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007321.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007333.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007349.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007353.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007360.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007363.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007384.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007402.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007414.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007421.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007428.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007429.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007430.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007431.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007434.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007439.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007448.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007452.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007453.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007501.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007502.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007505.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007506.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007507.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007509.JPG",
-          "annotation": null
-        },
-        {
-          "type": "image",
-          "name": "R0007510.JPG",
-          "annotation": null
-        }
-      ]
+      "type": "image",
+      "name": "R0007291.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007292.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007293.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007298.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007301.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007305.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007312.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007316.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007318.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007321.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007333.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007349.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007353.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007360.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007363.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007384.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007402.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007414.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007421.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007428.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007429.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007430.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007431.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007434.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007439.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007448.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007452.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007453.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007501.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007502.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007505.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007506.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007507.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007509.JPG",
+      "annotation": null
+    },
+    {
+      "type": "image",
+      "name": "R0007510.JPG",
+      "annotation": null
     }
   ]
 }
