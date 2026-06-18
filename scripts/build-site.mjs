@@ -2,15 +2,15 @@
 /**
  * build-site.mjs
  * ---------------------------------------------------------------------------
- * Reads _data/gallery.json (written by compress-images.mjs) and generates
- * a complete static site under _site/:
+ * Reads _data/gallery/ (per-folder JSON files written by scan-images.mjs)
+ * and generates a complete static site under _site/:
  *
  *   _site/index.html
  *   _site/gallery/index.html          <- root gallery grid
  *   _site/gallery/<folder>/index.html <- one per subfolder, any depth
  *   _site/assets/                     <- copied from assets/
- *   _site/images/thumbs/              <- symlinked / copied
- *   _site/images/fulls/               <- symlinked / copied
+ *   _site/images/thumbs/              <- copied
+ *   _site/images/fulls/               <- copied
  *
  * No Ruby. No Jekyll. Just Node.
  * ---------------------------------------------------------------------------
@@ -20,9 +20,10 @@ import fs   from "node:fs/promises";
 import path from "node:path";
 import { existsSync, cpSync } from "node:fs";
 
-const ROOT      = process.cwd();
-const DATA_FILE = path.join(ROOT, "_data", "gallery.json");
-const SITE_DIR  = path.join(ROOT, "_site");
+const ROOT         = process.cwd();
+const GALLERY_DIR  = path.join(ROOT, "_data", "gallery");
+const INDEX_FILE   = path.join(GALLERY_DIR, "index.json");
+const SITE_DIR     = path.join(ROOT, "_site");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -53,19 +54,24 @@ function formatDate(iso) {
   } catch { return iso; }
 }
 
-// Find a node in the tree by its path string
-function findNode(tree, targetPath) {
-  if (!targetPath || targetPath === "") return tree;
-  const segments = targetPath.split("/");
-  let node = tree;
-  for (const seg of segments) {
-    const found = node.folders?.find(
-      f => f.slug.split("/").pop() === seg
-    );
-    if (!found) return null;
-    node = found;
+// ---------------------------------------------------------------------------
+// Load per-folder data
+// ---------------------------------------------------------------------------
+
+async function loadIndex() {
+  return JSON.parse(await fs.readFile(INDEX_FILE, "utf8"));
+}
+
+async function loadFolder(folderPath) {
+  // folderPath like "BATH" or "SUN/2024"
+  if (!folderPath) {
+    // Root-level photos live in index.json itself
+    const index = await loadIndex();
+    return { photos: index.photos || [], subfolders: index.subfolders || [] };
   }
-  return node;
+  const filePath = path.join(GALLERY_DIR, folderPath + ".json");
+  if (!existsSync(filePath)) return { photos: [], subfolders: [] };
+  return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +79,7 @@ function findNode(tree, targetPath) {
 // ---------------------------------------------------------------------------
 
 function htmlShell({ title, siteTitle, breadcrumbs, bodyContent, rootPath }) {
-  const base = rootPath; // e.g. "../.." to reach _site root from nested pages
+  const base = rootPath;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,12 +155,12 @@ function buildBreadcrumbs(folderPath, rootPath) {
   return html;
 }
 
-function buildGrid(node, rootPath) {
+function buildGrid(subfolders, photos, rootPath) {
   const base = rootPath;
   let html = `<div class="square-grid">\n`;
 
   // Folder squares
-  for (const folder of node.folders) {
+  for (const folder of subfolders) {
     const label = folder.name;
     const href  = `${base}/gallery/${folder.path}/index.html`;
     const cover = folder.cover
@@ -183,7 +189,7 @@ function buildGrid(node, rootPath) {
   }
 
   // Photo squares
-  for (const photo of node.photos) {
+  for (const photo of photos) {
     const exif = photo.exif || {};
     const exifPill = [exif.aperture, exif.shutterSpeed, exif.iso]
       .filter(Boolean).join(" · ");
@@ -213,8 +219,8 @@ function buildGrid(node, rootPath) {
 
   html += `\n</div>`;
 
-  if (!node.folders.length && !node.photos.length) {
-    html += `<p class="gallery-empty">This folder is empty. Add photos to <code>images/fulls/${esc(node.path)}</code> and run <code>npm run build</code>.</p>`;
+  if (!subfolders.length && !photos.length) {
+    html += `<p class="gallery-empty">This folder is empty. Add photos to <code>images/fulls/${esc("")}</code> and run <code>npm run build</code>.</p>`;
   }
 
   return html;
@@ -224,27 +230,33 @@ function buildGrid(node, rootPath) {
 // Page generators
 // ---------------------------------------------------------------------------
 
-async function writeGalleryPage(node, tree, siteTitle, isRoot) {
-  // Depth of this node determines how many "../" we need to reach _site/
-  const depth = isRoot ? 1 : node.path.split("/").length + 1;
+async function writeGalleryPage(folderPath, siteTitle, isRoot, indexNode) {
+  const depth    = isRoot ? 1 : folderPath.split("/").length + 1;
   const rootPath = "../".repeat(depth).replace(/\/$/, "") || ".";
 
   const outDir = isRoot
     ? path.join(SITE_DIR, "gallery")
-    : path.join(SITE_DIR, "gallery", node.path);
+    : path.join(SITE_DIR, "gallery", folderPath);
 
   await ensureDir(outDir);
 
-  const breadcrumbs = buildBreadcrumbs(isRoot ? "" : node.path, rootPath);
-  const grid        = buildGrid(node, rootPath);
+  // Load this folder's data
+  const data = await loadFolder(folderPath);
+  const subfolders = isRoot ? indexNode.subfolders : (data.subfolders || []);
+  const photos     = data.photos || [];
+  const name       = isRoot ? "Gallery" : (data.name || folderPath.split("/").pop());
+  const totalCount = isRoot ? indexNode.totalPhotoCount : (data.totalPhotoCount || photos.length);
+
+  const breadcrumbs = buildBreadcrumbs(isRoot ? "" : folderPath, rootPath);
+  const grid        = buildGrid(subfolders, photos, rootPath);
 
   const bodyContent = `
-    <h1 class="gallery-title">${esc(node.name)}</h1>
-    <p class="gallery-count">${node.totalPhotoCount} photo${node.totalPhotoCount !== 1 ? "s" : ""}</p>
+    <h1 class="gallery-title">${esc(name)}</h1>
+    <p class="gallery-count">${totalCount} photo${totalCount !== 1 ? "s" : ""}</p>
     ${grid}`;
 
   const html = htmlShell({
-    title: node.name,
+    title: name,
     siteTitle,
     breadcrumbs,
     bodyContent,
@@ -254,8 +266,8 @@ async function writeGalleryPage(node, tree, siteTitle, isRoot) {
   await fs.writeFile(path.join(outDir, "index.html"), html, "utf8");
 
   // Recurse into subfolders
-  for (const sub of node.folders) {
-    await writeGalleryPage(sub, tree, siteTitle, false);
+  for (const sub of subfolders) {
+    await writeGalleryPage(sub.path, siteTitle, false, indexNode);
   }
 }
 
@@ -295,13 +307,14 @@ async function writeIndexPage(siteTitle) {
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
+
 async function main() {
-  if (!existsSync(DATA_FILE)) {
-    console.error(`_data/gallery.json not found. Run "npm run compress" first.`);
+  if (!existsSync(INDEX_FILE)) {
+    console.error(`_data/gallery/index.json not found. Run "npm run build" first.`);
     process.exit(1);
   }
 
-  const tree      = JSON.parse(await fs.readFile(DATA_FILE, "utf8"));
+  const index     = await loadIndex();
   const siteTitle = "My Photography";
 
   // Clean + recreate _site
@@ -322,12 +335,12 @@ async function main() {
 
   // Generate pages
   await writeIndexPage(siteTitle);
-  await writeGalleryPage(tree, tree, siteTitle, true);
+  await writeGalleryPage("", siteTitle, true, index);
 
   // Count pages written
-  let pageCount = 1; // index
-  function countPages(node) { pageCount++; node.folders.forEach(countPages); }
-  countPages(tree);
+  let pageCount = 1;
+  function countPages(node) { pageCount++; node.subfolders?.forEach(countPages); }
+  countPages(index);
 
   console.log(`Built ${pageCount} pages → _site/`);
   console.log(`Run "npm start" to preview at http://localhost:3000`);

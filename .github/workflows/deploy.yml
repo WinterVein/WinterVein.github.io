@@ -26,8 +26,21 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: deps-${{ hashFiles('package-lock.json') }}
+
       - name: Install dependencies
         run: npm install
+
+      - name: Cache gallery metadata
+        uses: actions/cache@v4
+        with:
+          path: _data/gallery
+          key: gallery-cache
+          restore-keys: gallery-
 
       - name: Scan images + build site
         run: npm run build

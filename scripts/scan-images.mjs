@@ -1,35 +1,38 @@
 #!/usr/bin/env node
 /**
- * scan-images.mjs
+ * scan-images.mjs (incremental)
  * ---------------------------------------------------------------------------
- * Walks images/fulls/ and images/thumbs/ (which must already exist — run
- * compress-images.mjs first if you haven't yet), extracts EXIF from each
- * full-size photo, merges in any descriptions.json caption files, and writes
- * _data/gallery.json.
+ * Walks images/fulls/ and images/thumbs/, extracts EXIF from NEW images only,
+ * merges descriptions.json captions, and writes per-folder JSON files into
+ * _data/gallery/. Previously processed images are skipped — no redundant EXIF
+ * extraction.
  *
- * This is the script that runs as part of `npm run build`. It never touches
- * the image files themselves.
+ * Output:
+ *   _data/gallery/index.json       <- folder tree (names, covers, counts)
+ *   _data/gallery/<folder>.json    <- per-folder photo data (self-contained)
+ *   _data/gallery/<a>/<b>.json     <- nested subfolder data
  *
  * Description priority (highest wins):
- *   1. descriptions.json in the same folder as the photo in images/fulls/
- *   2. Previously saved description in _data/gallery.json (so hand-edits
- *      made directly in gallery.json survive a re-scan)
- *   3. Empty string
+ *   1. descriptions.json in the same folder as the photo
+ *   2. Previously saved description in the per-folder JSON
+ *   3. Previously saved description from any other folder (handles moves)
+ *   4. Empty string
  * ---------------------------------------------------------------------------
  */
 
-import { readdir, readFile, writeFile, mkdir, access } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, access, rm } from 'node:fs/promises';
 import { join, relative, basename, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import exifr from 'exifr';
 
-const __dirname  = dirname(fileURLToPath(import.meta.url));
-const ROOT       = join(__dirname, '..');
-const FULLS_DIR  = join(ROOT, 'images', 'fulls');
-const THUMBS_DIR = join(ROOT, 'images', 'thumbs');
-const DATA_DIR   = join(ROOT, '_data');
-const GALLERY_JSON = join(DATA_DIR, 'gallery.json');
+const __dirname    = dirname(fileURLToPath(import.meta.url));
+const ROOT         = join(__dirname, '..');
+const FULLS_DIR    = join(ROOT, 'images', 'fulls');
+const THUMBS_DIR   = join(ROOT, 'images', 'thumbs');
+const DATA_DIR     = join(ROOT, '_data');
+const GALLERY_DIR  = join(DATA_DIR, 'gallery');
+const INDEX_FILE   = join(GALLERY_DIR, 'index.json');
 
 const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.JPG', '.JPEG']);
 
@@ -68,20 +71,20 @@ async function extractExif(srcPath) {
     });
     if (!data) return null;
     return {
-      camera:      [data.Make, data.Model].filter(Boolean).join(' ') || null,
-      lens:        data.LensModel || null,
-      aperture:    data.FNumber     ? `f/${data.FNumber}`                    : null,
+      camera:       [data.Make, data.Model].filter(Boolean).join(' ') || null,
+      lens:         data.LensModel || null,
+      aperture:     data.FNumber     ? `f/${data.FNumber}`                    : null,
       shutterSpeed: formatShutter(data.ExposureTime),
-      iso:         data.ISO         ? `ISO ${data.ISO}`                      : null,
-      focalLength: data.FocalLengthIn35mmFormat
-                     ? `${data.FocalLengthIn35mmFormat}mm`
-                     : data.FocalLength ? `${data.FocalLength}mm`            : null,
-      dateTaken:   (data.DateTimeOriginal || data.CreateDate)
-                     ? new Date(data.DateTimeOriginal || data.CreateDate).toISOString()
-                     : null,
+      iso:          data.ISO         ? `ISO ${data.ISO}`                      : null,
+      focalLength:  data.FocalLengthIn35mmFormat
+                      ? `${data.FocalLengthIn35mmFormat}mm`
+                      : data.FocalLength ? `${data.FocalLength}mm`            : null,
+      dateTaken:    (data.DateTimeOriginal || data.CreateDate)
+                      ? new Date(data.DateTimeOriginal || data.CreateDate).toISOString()
+                      : null,
       gps: (data.GPSLatitude && data.GPSLongitude)
-                     ? { lat: data.GPSLatitude, lon: data.GPSLongitude }
-                     : null,
+                      ? { lat: data.GPSLatitude, lon: data.GPSLongitude }
+                      : null,
     };
   } catch {
     return null;
@@ -102,7 +105,6 @@ async function loadDescriptions(dir) {
     try {
       const raw = await readFile(file, 'utf8');
       map = JSON.parse(raw);
-      // Strip the readme key if present
       delete map['_readme'];
     } catch (err) {
       console.warn(`  ⚠ Could not parse ${file}: ${err.message}`);
@@ -113,33 +115,70 @@ async function loadDescriptions(dir) {
 }
 
 // ---------------------------------------------------------------------------
-// Load previous gallery.json so we can preserve hand-written descriptions
+// Load ALL existing per-folder JSON files for description preservation
 // ---------------------------------------------------------------------------
 
-function indexDescriptions(node, map = new Map()) {
-  for (const p of (node.photos || [])) {
-    if (p.description) map.set(p.relativePath, p.description);
+async function loadAllDescriptions() {
+  const map = new Map();
+
+  async function walk(dir) {
+    if (!(await exists(dir))) return;
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) {
+        await walk(full);
+      } else if (e.name.endsWith('.json') && e.name !== 'index.json') {
+        try {
+          const data = JSON.parse(await readFile(full, 'utf8'));
+          for (const p of (data.photos || [])) {
+            if (p.description) map.set(p.relativePath, p.description);
+          }
+        } catch {}
+      }
+    }
   }
-  for (const f of (node.folders || [])) indexDescriptions(f, map);
+
+  await walk(GALLERY_DIR);
   return map;
 }
 
 // ---------------------------------------------------------------------------
-// Recursive directory walker — builds tree
+// Load a single per-folder JSON (returns null if not found)
 // ---------------------------------------------------------------------------
 
-async function buildNode(absDir) {
-  const relDir = relative(FULLS_DIR, absDir);
+async function loadExistingNode(relDir) {
+  if (!relDir) {
+    // Root: photos live in index.json
+    if (!(await exists(INDEX_FILE))) return null;
+    try {
+      const index = JSON.parse(await readFile(INDEX_FILE, 'utf8'));
+      return { photos: index.photos || [] };
+    } catch { return null; }
+  }
+  const filePath = join(GALLERY_DIR, relDir + '.json');
+  if (!(await exists(filePath))) return null;
+  try {
+    return JSON.parse(await readFile(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Recursive directory walker — incremental per-folder processing
+// ---------------------------------------------------------------------------
+
+async function buildNode(absDir, previousDescriptions) {
+  const relDir     = relative(FULLS_DIR, absDir);
   const relDirNorm = relDir === '' ? '' : relDir.split(/[\\/]/).join('/');
-  const name = relDir === '' ? 'Gallery' : titleCase(basename(absDir));
+  const name       = relDir === '' ? 'Gallery' : titleCase(basename(absDir));
+
+  // Load existing per-folder data for incremental processing
+  const existing      = await loadExistingNode(relDirNorm);
+  const existingMap   = new Map((existing?.photos || []).map(p => [p.filename, p]));
 
   const entries = await readdir(absDir, { withFileTypes: true });
-
-  // Subfolders (recurse)
-  const folders = [];
-  for (const e of entries.filter(e => e.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
-    folders.push(await buildNode(join(absDir, e.name)));
-  }
 
   // Photos in this dir
   const imageEntries = entries
@@ -149,11 +188,23 @@ async function buildNode(absDir) {
   const folderDescriptions = await loadDescriptions(absDir);
 
   const photos = [];
+  let newCount = 0, reusedCount = 0;
+
   for (const e of imageEntries) {
-    const srcPath    = join(absDir, e.name);
+    const cached = existingMap.get(e.name);
+
+    if (cached) {
+      // Reuse — no EXIF extraction needed
+      const desc = folderDescriptions[e.name] ?? cached.description ?? '';
+      photos.push(desc !== cached.description ? { ...cached, description: desc } : cached);
+      reusedCount++;
+      continue;
+    }
+
+    // New image — extract EXIF + dimensions
+    const srcPath      = join(absDir, e.name);
     const relativePath = (relDirNorm ? relDirNorm + '/' : '') + e.name;
 
-    // Dimensions from the full image
     let width = null, height = null;
     try {
       const meta = await sharp(srcPath).metadata();
@@ -161,10 +212,10 @@ async function buildNode(absDir) {
       height = meta.height;
     } catch {}
 
-    const exif = await extractExif(srcPath);
-
-    // Description: descriptions.json wins, then previous gallery.json value
-    const description = folderDescriptions[e.name] ?? previousDescriptions.get(relativePath) ?? '';
+    const exif        = await extractExif(srcPath);
+    const description = folderDescriptions[e.name]
+                     ?? previousDescriptions.get(relativePath)
+                     ?? '';
 
     photos.push({
       filename:     e.name,
@@ -177,29 +228,103 @@ async function buildNode(absDir) {
       exif,
     });
 
-    process.stdout.write(`  scanned ${relativePath}\n`);
+    process.stdout.write(`  + ${relativePath}\n`);
+    newCount++;
   }
 
-  function findCover(node) {
-    if (node.photos.length) return node.photos[0].thumbUrl;
-    for (const f of node.folders) { const c = findCover(f); if (c) return c; }
+  // Detect removals (in cached data but not on disk)
+  const onDisk = new Set(imageEntries.map(e => e.name));
+  for (const fn of existingMap.keys()) {
+    if (!onDisk.has(fn)) {
+      process.stdout.write(`  - ${relDirNorm ? relDirNorm + '/' : ''}${fn} (removed)\n`);
+    }
+  }
+
+  if (reusedCount && !newCount) {
+    process.stdout.write(`  ${relDirNorm || '.'}: ${reusedCount} cached\n`);
+  }
+
+  // Subfolders (recurse)
+  const subfolders = [];
+  for (const e of entries.filter(e => e.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
+    subfolders.push(await buildNode(join(absDir, e.name), previousDescriptions));
+  }
+
+  function findCover(photos, subfolders) {
+    if (photos.length) return photos[0].thumbUrl;
+    for (const f of subfolders) { const c = findCover(f.photos, f.subfolders); if (c) return c; }
     return null;
   }
 
-  const node = { name, slug: relDirNorm, path: relDirNorm, folders, photos,
-                 photoCount: photos.length };
-  node.totalPhotoCount = photos.length + folders.reduce((s, f) => s + f.totalPhotoCount, 0);
-  node.cover = findCover(node);
+  const totalPhotoCount = photos.length + subfolders.reduce((s, f) => s + f.totalPhotoCount, 0);
 
-  return node;
+  return {
+    name,
+    slug:    relDirNorm,
+    path:    relDirNorm,
+    subfolders,
+    photos,
+    photoCount:       photos.length,
+    totalPhotoCount,
+    cover:            findCover(photos, subfolders),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Write per-folder JSON files (walks tree, writes each node's photos)
+// ---------------------------------------------------------------------------
+
+async function writeFolderFiles(node) {
+  if (node.path) {
+    const filePath = join(GALLERY_DIR, node.path + '.json');
+    await mkdir(dirname(filePath), { recursive: true });
+    await writeFile(filePath, JSON.stringify({
+      name:             node.name,
+      slug:             node.slug,
+      path:             node.path,
+      subfolders:       node.subfolders.map(f => ({ name: f.name, path: f.path, cover: f.cover, totalPhotoCount: f.totalPhotoCount })),
+      photos:           node.photos,
+      photoCount:       node.photoCount,
+      totalPhotoCount:  node.totalPhotoCount,
+      cover:            node.cover,
+    }, null, 2), 'utf8');
+  }
+
+  for (const sub of node.subfolders) {
+    await writeFolderFiles(sub);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Write index.json — tree structure only (no photo data)
+// ---------------------------------------------------------------------------
+
+function buildIndexTree(node) {
+  return {
+    name:             node.name,
+    path:             node.path,
+    cover:            node.cover,
+    photoCount:       node.photoCount,
+    totalPhotoCount:  node.totalPhotoCount,
+    subfolders:       node.subfolders.map(buildIndexTree),
+  };
+}
+
+async function writeIndex(node) {
+  const index = buildIndexTree(node);
+
+  // Root-level photos go in index.json (they have no per-folder file)
+  if (node.photos.length) {
+    index.photos = node.photos;
+  }
+
+  await mkdir(GALLERY_DIR, { recursive: true });
+  await writeFile(INDEX_FILE, JSON.stringify(index, null, 2), 'utf8');
 }
 
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
-
-// Module-level so buildNode closures can read it
-let previousDescriptions = new Map();
 
 async function main() {
   if (!(await exists(FULLS_DIR))) {
@@ -207,23 +332,32 @@ async function main() {
     process.exit(1);
   }
 
-  await mkdir(DATA_DIR, { recursive: true });
+  await mkdir(GALLERY_DIR, { recursive: true });
 
-  // Load previous gallery.json for description preservation
-  if (await exists(GALLERY_JSON)) {
-    try {
-      previousDescriptions = indexDescriptions(JSON.parse(await readFile(GALLERY_JSON, 'utf8')));
-    } catch {}
+  // Load ALL existing per-folder data for description preservation
+  const previousDescriptions = await loadAllDescriptions();
+
+  console.log('\n🔍  scan-images — incremental scan\n');
+
+  const tree = await buildNode(FULLS_DIR, previousDescriptions);
+
+  // Write per-folder files + index
+  await writeFolderFiles(tree);
+  await writeIndex(tree);
+
+  // Clean up old monolithic gallery.json if it exists
+  const oldFile = join(DATA_DIR, 'gallery.json');
+  if (await exists(oldFile)) {
+    await rm(oldFile);
+    console.log('  (removed old gallery.json)');
   }
 
-  console.log('\n🔍  scan-images — extracting EXIF and building gallery manifest\n');
-
-  const tree = await buildNode(FULLS_DIR);
-
-  await writeFile(GALLERY_JSON, JSON.stringify(tree, null, 2), 'utf8');
-
-  console.log(`\n  ✓ gallery.json written  (${tree.totalPhotoCount} photos across all folders)`);
+  console.log(`\n  ✓ ${tree.totalPhotoCount} photos across ${countFolders(tree) - 1} folders → _data/gallery/`);
   console.log(`  Next step: node scripts/build-site.mjs\n`);
+}
+
+function countFolders(node) {
+  return 1 + node.subfolders.reduce((s, f) => s + countFolders(f), 0);
 }
 
 main().catch(err => { console.error('Fatal:', err); process.exit(1); });
