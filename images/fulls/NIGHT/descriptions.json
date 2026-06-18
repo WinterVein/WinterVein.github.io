@@ -1,0 +1,6 @@
+{
+  "_readme": "Drop a descriptions.json like this in any subfolder inside images/fulls/. The key is the exact filename of the photo. Re-running 'npm run build' will pick these up automatically without overwriting them.",
+  "IMG_001.jpg": "Golden hour over the valley, shot handheld at the edge of the ridge.",
+  "DSC_4421.jpg": "Long exposure of the harbour lights — 25 second shot from a tripod on the jetty.",
+  "R0006909.jpg": "Street portrait, Tokyo Shinjuku. Available light only."
+}

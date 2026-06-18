@@ -1,44 +1,18 @@
 {
-  "name": "photography",
-  "version": "5.0.0",
-  "description": "A jekyll website for photographer cum developer",
-  "main": "npmfile.js",
+  "name": "photo-gallery",
+  "version": "2.1.0",
+  "description": "Recursive photo gallery. Pure Node.js — no Ruby, no Jekyll.",
+  "type": "module",
+  "private": true,
   "scripts": {
-    "compress": "node compress-images.mjs",
-    "resize-half": "node resize-half.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rampatra/photography.git"
-  },
-  "keywords": [
-    "photography",
-    "jekyll",
-    "website",
-    "template",
-    "website template",
-    "portfolio",
-    "portfolio website"
-  ],
-  "author": "WinterVein",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/rampatra/photography/issues"
-  },
-  "homepage": "https://github.com/rampatra/photography#readme",
-  "devDependencies": {
-    "del": "^4.1.1",
-    "gulp": "^4.0.2",
-    "gulp-filter": "^9.0.1",
-    "gulp-image-resize": "^0.13.1",
-    "gulp-rename": "^1.4.0",
-    "gulp-sass": "^5.0.0",
-    "gulp-uglify": "^3.0.0",
-    "sass": "^1.25.0"
+    "compress":  "node scripts/compress-images.mjs",
+    "scan":      "node scripts/scan-images.mjs",
+    "build":     "node scripts/scan-images.mjs && node scripts/build-site.mjs",
+    "dev":       "node scripts/scan-images.mjs && node scripts/build-site.mjs && node server.js",
+    "start":     "node server.js"
   },
   "dependencies": {
-    "p-limit": "^7.3.0",
-    "sharp": "^0.35.1"
+    "sharp": "^0.33.5",
+    "exifr": "^7.1.3"
   }
 }

@@ -1,0 +1,535 @@
+/* =============================================================================
+   Photo Gallery — main.css
+   -----------------------------------------------------------------------------
+   Design concept: "contact sheet in a darkroom".
+   - Near-black canvas so photos carry full contrast and color.
+   - A tight condensed display face for titles/folder labels (the kind of
+     face stamped on film boxes / contact sheets), paired with a quiet
+     humanist sans for body copy.
+   - EXIF data rendered in monospace, like metadata burned into a frame edge.
+   - Pure, almost-touching square grid -- the floor is the photos themselves.
+   - One signature accent: a warm amber "safelight" color used sparingly for
+     hover/focus states, evoking a darkroom safelight glow.
+   ========================================================================== */
+
+:root {
+  --bg: #0e0e0e;
+  --bg-raised: #161616;
+  --ink: #f1eee7;
+  --ink-dim: #9b968c;
+  --line: #2a2a2a;
+  --accent: #d08a4a;       /* darkroom safelight amber */
+  --accent-dim: #8a5d34;
+  --overlay: rgba(10, 9, 8, 0.82);
+
+  --font-display: "Archivo Narrow", "Oswald", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --grid-gap: 4px;
+  --max-width: 1440px;
+}
+
+@font-face {
+  font-family: "Archivo Narrow";
+  src: local("Archivo Narrow");
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: var(--accent-dim);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Header
+   ------------------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(14, 14, 14, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+}
+
+.site-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.site-nav {
+  display: flex;
+  gap: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-nav a {
+  color: var(--ink-dim);
+  transition: color 0.15s ease;
+}
+
+.site-nav a:hover {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Gallery page header
+   ------------------------------------------------------------------------- */
+
+.gallery-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.gallery-breadcrumb {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 18px;
+}
+
+.gallery-breadcrumb a {
+  color: var(--ink-dim);
+  transition: color 0.15s ease;
+}
+
+.gallery-breadcrumb a:hover {
+  color: var(--accent);
+}
+
+.gallery-breadcrumb__sep {
+  margin: 0 8px;
+  color: var(--line);
+}
+
+.gallery-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(28px, 5vw, 48px);
+  letter-spacing: 0.01em;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+.gallery-count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin: 0 0 28px;
+}
+
+.gallery-empty {
+  color: var(--ink-dim);
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+.gallery-empty code {
+  font-family: var(--font-mono);
+  background: var(--bg-raised);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Square grid
+   ------------------------------------------------------------------------- */
+
+.square-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--grid-gap);
+}
+
+@media (min-width: 700px) {
+  .square-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+.square {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--bg-raised);
+  cursor: pointer;
+}
+
+.square__inner {
+  position: absolute;
+  inset: 0;
+}
+
+.square__inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
+}
+
+.square:hover .square__inner img {
+  transform: scale(1.06);
+  filter: brightness(0.55);
+}
+
+.square__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.square:hover .square__overlay {
+  opacity: 1;
+}
+
+.square__overlay--folder {
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 55%);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  opacity: 1; /* folders always show their label, not just on hover */
+}
+
+.square--folder .square__inner img {
+  filter: brightness(0.45) saturate(0.7);
+}
+
+.square--folder:hover .square__inner img {
+  filter: brightness(0.3) saturate(0.7);
+}
+
+.square__empty-folder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-dim);
+  background: var(--bg-raised);
+}
+
+.square__folder-icon {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.square__label {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.square__sublabel {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-dim);
+  margin-top: 4px;
+}
+
+.square__overlay--photo {
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 60%);
+}
+
+.square__exif-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: rgba(0,0,0,0.4);
+  padding: 4px 8px;
+  border-radius: 3px;
+  align-self: flex-start;
+}
+
+/* ---------------------------------------------------------------------------
+   Lightbox
+   ------------------------------------------------------------------------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(8, 7, 6, 0.97);
+  display: none;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+}
+
+.lightbox.is-open {
+  display: grid;
+}
+
+.lightbox__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 8px 8px 4px;
+  min-height: 0;
+}
+
+.lightbox__zoom-wrap {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+}
+
+.lightbox__zoom-wrap.is-zoomed {
+  cursor: zoom-out;
+}
+
+.lightbox__image {
+  max-width: 100%;
+  max-height: calc(100vh - 130px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+  transform-origin: center center;
+  user-select: none;
+}
+
+.lightbox__zoom-wrap.is-zoomed .lightbox__image {
+  transform: scale(4);
+  transition: transform 0.15s ease-out;
+}
+
+.lightbox__hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 14px 0 0;
+  opacity: 0.7;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 5;
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 10px;
+  transition: color 0.15s ease;
+}
+
+.lightbox__close:hover {
+  color: var(--accent);
+}
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  background: rgba(0,0,0,0.3);
+  border: none;
+  color: var(--ink);
+  font-size: 36px;
+  line-height: 1;
+  width: 52px;
+  height: 64px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lightbox__nav:hover {
+  background: rgba(0,0,0,0.55);
+  color: var(--accent);
+}
+
+.lightbox__nav--prev {
+  left: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.lightbox__nav--next {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+.lightbox__info {
+  border-top: 1px solid var(--line);
+  background: var(--bg-raised);
+  padding: 16px 28px 22px;
+  max-height: 22vh;
+  overflow-y: auto;
+}
+
+.lightbox__description {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 14px;
+  max-width: 720px;
+}
+
+.lightbox__description:empty {
+  display: none;
+}
+
+.lightbox__exif {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px 24px;
+  margin: 0;
+}
+
+.lightbox__exif-item {
+  display: none; /* shown via JS only when it has a value */
+}
+
+.lightbox__exif-item.has-value {
+  display: block;
+}
+
+.lightbox__exif-item dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 0 0 2px;
+}
+
+.lightbox__exif-item dd {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------------------- */
+
+.site-footer {
+  text-align: center;
+  padding: 32px 24px 48px;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .square__inner img,
+  .square__overlay,
+  .lightbox__image {
+    transition: none !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Small screens: stack lightbox controls sensibly, simplify nav buttons
+   ------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .lightbox__nav {
+    width: 40px;
+    height: 52px;
+    font-size: 28px;
+  }
+
+  .lightbox__info {
+    padding: 14px 16px 18px;
+  }
+
+  .site-nav {
+    gap: 12px;
+  }
+}
+
+/* Hero CTA button */
+.hero-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 12px 28px;
+  transition: background 0.2s ease, color 0.2s ease;
+  display: inline-block;
+}
+.hero-btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
