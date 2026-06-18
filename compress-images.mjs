@@ -119,51 +119,35 @@ async function compressDir(fullsDir, thumbsDir, maxSizeBytes) {
       try {
         const metadata = await sharp(fullItemPath).metadata();
         const inputSize = (await stat(fullItemPath)).size;
-        const showPath = relative(FULLS_DIR, fullItemPath);
+        const quality = await findBestQuality(fullItemPath, maxSizeBytes);
 
-        let quality;
-        let compressedSize = inputSize;
+        // Compress full image
+        const tmpPath = join(fullsDir, `.tmp_${item.name}`);
+        await sharp(fullItemPath)
+          .withMetadata()
+          .jpeg({ quality, mozjpeg: true })
+          .toFile(tmpPath);
+        await unlink(fullItemPath);
+        await rename(tmpPath, fullItemPath);
+        const compressedSize = (await stat(fullItemPath)).size;
 
-        // Check if thumbnail already exists (skip compression if so)
-        let thumbExists = false;
-        try { await stat(thumbItemPath); thumbExists = true; } catch { }
+        // Generate thumbnail
+        await ensureDir(thumbsDir);
+        await sharp(fullItemPath)
+          .withMetadata()
+          .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
+          .jpeg({ quality: 80, mozjpeg: true })
+          .toFile(thumbItemPath);
 
-        if (inputSize <= maxSizeBytes && thumbExists) {
-          quality = 'skip';
-          console.log(`${showPath}: skip compress (${(inputSize / 1024).toFixed(1)}KB already under ${(maxSizeBytes / 1024).toFixed(0)}KB)`);
-        } else {
-          quality = await findBestQuality(fullItemPath, maxSizeBytes);
-
-          const tmpPath = join(fullsDir, `.tmp_${item.name}`);
-          await sharp(fullItemPath)
-            .withMetadata()
-            .jpeg({ quality, mozjpeg: true })
-            .toFile(tmpPath);
-          await unlink(fullItemPath);
-          await rename(tmpPath, fullItemPath);
-          compressedSize = (await stat(fullItemPath)).size;
-        }
-
-        // Generate thumbnail if missing
-        if (!thumbExists) {
-          await ensureDir(thumbsDir);
-          await sharp(fullItemPath)
-            .withMetadata()
-            .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
-            .jpeg({ quality: 80, mozjpeg: true })
-            .toFile(thumbItemPath);
-        }
-
-        const thumbSize = thumbExists ? 0 : (await stat(thumbItemPath)).size;
+        const thumbSize = (await stat(thumbItemPath)).size;
         const fitsTarget = compressedSize <= maxSizeBytes ? 'yes' : 'no';
-        if (quality !== 'skip') {
-          console.log(
-            `${showPath}: ${metadata.width}x${metadata.height} -> ` +
-            `q${quality}, full: ${(inputSize / 1024).toFixed(1)}KB -> ${(compressedSize / 1024).toFixed(1)}KB ` +
-            `(under ${(maxSizeBytes / 1024).toFixed(0)}KB? ${fitsTarget}), ` +
-            `thumb: ${(thumbSize / 1024).toFixed(1)}KB`
-          );
-        }
+        const showPath = relative(FULLS_DIR, fullItemPath);
+        console.log(
+          `${showPath}: ${metadata.width}x${metadata.height} -> ` +
+          `q${quality}, full: ${(inputSize / 1024).toFixed(1)}KB -> ${(compressedSize / 1024).toFixed(1)}KB ` +
+          `(under ${(maxSizeBytes / 1024).toFixed(0)}KB? ${fitsTarget}), ` +
+          `thumb: ${(thumbSize / 1024).toFixed(1)}KB`
+        );
       } catch (err) {
         console.error(`Error processing ${relative(FULLS_DIR, fullItemPath)}:`, err.message);
       }
