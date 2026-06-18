@@ -1,11 +1,11 @@
 {
   "name": "photography",
   "version": "5.0.0",
-  "description": "A jekyll website for photographer",
+  "description": "A jekyll website for photographer cum developer",
   "main": "npmfile.js",
   "scripts": {
     "compress": "node compress-images.mjs",
-    "halfsize": "node resize-half.mjs",
+    "resize-half": "node resize-half.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,12 +21,12 @@
     "portfolio",
     "portfolio website"
   ],
-  "author": "WinterVein",
+  "author": "Ram Patra",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/wintervein/wintervein.github.io/issues"
+    "url": "https://github.com/rampatra/photography/issues"
   },
-  "homepage": "https://github.com/wintervein/wintervein.github.io#readme",
+  "homepage": "https://github.com/rampatra/photography#readme",
   "devDependencies": {
     "del": "^4.1.1",
     "gulp": "^4.0.2",
