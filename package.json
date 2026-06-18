@@ -38,6 +38,7 @@
     "sass": "^1.25.0"
   },
   "dependencies": {
+    "p-limit": "^7.3.0",
     "sharp": "^0.35.1"
   }
 }
