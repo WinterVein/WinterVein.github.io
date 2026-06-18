@@ -1,4 +1,4 @@
-import { readdir, stat, unlink, rename, writeFile } from 'node:fs/promises';
+import { readdir, stat, unlink, rename, writeFile, mkdir } from 'node:fs/promises';
 import { join, extname, dirname } from 'node:path';
 import sharp from 'sharp';
 import { fileURLToPath } from 'node:url';
@@ -19,15 +19,16 @@ const qualityCache = new Map();
 
 /**
  * Ultra-fast: Estimate quality based on image properties
+ * Preserves ALL EXIF metadata using keepMetadata()
  */
 async function compressImageFast(inputPath, targetSize) {
   const metadata = await sharp(inputPath).metadata();
   const inputSize = (await stat(inputPath)).size;
   
-  // If already small enough, just copy with metadata
+  // If already small enough, just copy with metadata preserved
   if (inputSize <= targetSize) {
     const buffer = await sharp(inputPath)
-      .withMetadata()
+      .keepMetadata()  // Preserve all EXIF/IPTC/XMP metadata
       .jpeg({ quality: 92, mozjpeg: true, progressive: true })
       .toBuffer();
     return { buffer, quality: 92, size: buffer.length };
@@ -70,9 +71,9 @@ async function compressImageFast(inputPath, targetSize) {
     qualityCache.set(cacheKey, quality);
   }
   
-  // Single compression attempt
+  // Single compression attempt with EXIF preservation
   let buffer = await sharp(inputPath)
-    .withMetadata()
+    .keepMetadata()  // Preserve all EXIF/IPTC/XMP metadata
     .jpeg({ quality, mozjpeg: true, progressive: true })
     .toBuffer();
   
@@ -81,7 +82,7 @@ async function compressImageFast(inputPath, targetSize) {
     // Reduce quality more aggressively
     const newQuality = Math.max(30, quality - 15);
     buffer = await sharp(inputPath)
-      .withMetadata()
+      .keepMetadata()  // Preserve all EXIF/IPTC/XMP metadata
       .jpeg({ quality: newQuality, mozjpeg: true, progressive: true })
       .toBuffer();
     quality = newQuality;
@@ -89,7 +90,7 @@ async function compressImageFast(inputPath, targetSize) {
     // Try increasing quality if we have room
     const newQuality = Math.min(92, quality + 10);
     const testBuffer = await sharp(inputPath)
-      .withMetadata()
+      .keepMetadata()  // Preserve all EXIF/IPTC/XMP metadata
       .jpeg({ quality: newQuality, mozjpeg: true, progressive: true })
       .toBuffer();
     if (testBuffer.length <= targetSize) {
@@ -102,12 +103,13 @@ async function compressImageFast(inputPath, targetSize) {
 }
 
 /**
- * Generate thumbnail for an image
+ * Generate thumbnail for an image with EXIF preservation
  */
 async function generateThumbnail(inputPath, outputPath) {
   try {
     await sharp(inputPath)
       .resize({ width: THUMB_WIDTH, withoutEnlargement: true, fit: 'inside' })
+      .keepMetadata()  // Preserve all EXIF/IPTC/XMP metadata in thumbnails
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true, progressive: true })
       .toFile(outputPath);
     return await stat(outputPath);
@@ -131,7 +133,7 @@ async function processFile(file) {
     
     // Check if already under max size
     if (inputSize <= MAX_FILE_SIZE) {
-      // Generate thumbnail
+      // Generate thumbnail with EXIF preservation
       const thumbStat = await generateThumbnail(inputPath, thumbPath);
       const thumbSize = thumbStat ? (thumbStat.size / 1024).toFixed(1) : 'failed';
       
@@ -152,7 +154,7 @@ async function processFile(file) {
     // Start thumbnail generation in background (don't await yet)
     const thumbPromise = generateThumbnail(inputPath, thumbPath);
     
-    // Fast compression
+    // Fast compression with EXIF preservation
     const { buffer, quality, size: compressedSize } = await compressImageFast(inputPath, MAX_FILE_SIZE);
     
     // Write compressed file using fs/promises writeFile (imported)
@@ -231,17 +233,18 @@ async function processWithConcurrency(files, concurrency) {
  * Main function
  */
 async function compressImages() {
-  console.log('🚀 Starting image optimization...');
+  console.log('🚀 Starting image optimization with EXIF preservation...');
   console.log(`📁 Using ${CONCURRENCY} concurrent workers`);
   console.log(`📁 Fulls directory: ${FULLS_DIR}`);
   console.log(`📁 Thumbs directory: ${THUMBS_DIR}`);
+  console.log(`📷 EXIF data (make, model, exposure, etc.) will be preserved`);
   
   // Ensure thumbs directory exists
   try {
     await stat(THUMBS_DIR);
   } catch {
     console.log('📁 Creating thumbs directory...');
-    await import('node:fs/promises').then(fs => fs.mkdir(THUMBS_DIR, { recursive: true }));
+    await mkdir(THUMBS_DIR, { recursive: true });
   }
   
   const files = await readdir(FULLS_DIR);
@@ -292,6 +295,7 @@ async function compressImages() {
   if (totalOriginal > 0) {
     console.log(`  Overall saving: ${((1 - totalCompressed / totalOriginal) * 100).toFixed(1)}%`);
   }
+  console.log(`  ✅ EXIF metadata preserved in all images`);
   console.log('='.repeat(55));
 }
 
