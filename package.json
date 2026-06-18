@@ -4,6 +4,7 @@
   "description": "A jekyll website for photographer cum developer",
   "main": "npmfile.js",
   "scripts": {
+    "compress": "node compress-images.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -34,5 +35,8 @@
     "gulp-sass": "^5.0.0",
     "gulp-uglify": "^3.0.0",
     "sass": "^1.25.0"
+  },
+  "dependencies": {
+    "sharp": "^0.35.1"
   }
 }
