@@ -5,6 +5,7 @@
   "main": "npmfile.js",
   "scripts": {
     "compress": "node compress-images.mjs",
+    "resize-half": "node resize-half.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
