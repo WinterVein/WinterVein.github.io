@@ -308,6 +308,12 @@ async function main() {
   await fs.rm(SITE_DIR, { recursive: true, force: true });
   await ensureDir(SITE_DIR);
 
+  // Copy .nojekyll to disable GitHub Pages Jekyll processing
+  const nojekyllSrc = path.join(ROOT, ".nojekyll");
+  if (existsSync(nojekyllSrc)) {
+    await fs.copyFile(nojekyllSrc, path.join(SITE_DIR, ".nojekyll"));
+  }
+
   // Copy static assets
   await copyDir(path.join(ROOT, "assets"), path.join(SITE_DIR, "assets"));
 
