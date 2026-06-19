@@ -49,13 +49,23 @@ const IMAGE_EXTS    = new Set(['.jpg', '.jpeg', '.JPG', '.JPEG']);
 // Helpers
 // ---------------------------------------------------------------------------
 
-function kb(bytes) { return (bytes / 1024).toFixed(1) + ' KB'; }
-
-async function exists(p) {
-  try { await access(p); return true; } catch { return false; }
+function kb(bytes) { 
+  if (!bytes || isNaN(bytes)) return '0 KB';
+  return (bytes / 1024).toFixed(1) + ' KB'; 
 }
 
-async function ensureDir(d) { await mkdir(d, { recursive: true }); }
+async function exists(p) {
+  try { 
+    await access(p); 
+    return true; 
+  } catch { 
+    return false; 
+  }
+}
+
+async function ensureDir(d) { 
+  await mkdir(d, { recursive: true }); 
+}
 
 /** Recursively collect all jpeg paths under a directory. Returns relative paths. */
 async function collectImages(dir, base = dir) {
@@ -170,7 +180,7 @@ async function processFile(relPath) {
   const srcPath   = join(FULLS_DIR, relPath);
   const thumbPath = join(THUMBS_DIR, relPath);
 
-  let compressResult = { skipped: true };
+  let compressResult = { skipped: true, inputSize: 0, outputSize: 0 };
 
   if (!THUMBS_ONLY) {
     try {
@@ -181,10 +191,12 @@ async function processFile(relPath) {
     }
   }
 
+  // Check if thumbnail exists - only generate if it doesn't exist OR force is set
   const thumbExists = await exists(thumbPath);
   if (FORCE || !thumbExists) {
     try {
       await generateThumbnail(srcPath, thumbPath);
+      console.log(`  🖼️  thumb generated: ${relPath}`);
     } catch (err) {
       console.error(`  ❌ thumbnail failed: ${relPath} — ${err.message}`);
     }
@@ -247,9 +259,9 @@ async function main() {
   const results = await runPool(images, CONCURRENCY, processFile);
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
 
-  const compressed = results.filter(r => !r.skipped);
-  const totalIn    = results.reduce((s, r) => s + r.inputSize, 0);
-  const totalOut   = results.reduce((s, r) => s + r.outputSize, 0);
+  const compressed = results.filter(r => r && !r.skipped);
+  const totalIn    = results.reduce((s, r) => s + (r?.inputSize || 0), 0);
+  const totalOut   = results.reduce((s, r) => s + (r?.outputSize || 0), 0);
 
   console.log(`\n${'─'.repeat(52)}`);
   console.log(`  Processed : ${results.length} / ${images.length}`);
