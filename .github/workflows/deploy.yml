@@ -43,38 +43,7 @@ jobs:
           restore-keys: gallery-
 
       - name: Generate descriptions.json from GEN.PLZ
-        run: |
-          # Find all GEN.PLZ files in the repository
-          GEN_FILES=$(find images -name "GEN.PLZ" -type f)
-          
-          for gen_file in $GEN_FILES; do
-            # Get the directory containing GEN.PLZ
-            dir=$(dirname "$gen_file")
-            
-            # Find all JPEG files in that directory
-            jpeg_files=$(find "$dir" -maxdepth 1 -name "*.jpg" -o -name "*.jpeg" -o -name "*.JPG" -o -name "*.JPEG" | sed 's|.*/||')
-            
-            # Create descriptions.json with blank entries for all photos
-            descriptions_json="{"
-            first=true
-            for jpeg in $jpeg_files; do
-              if [ "$first" = true ]; then
-                first=false
-              else
-                descriptions_json+=","
-              fi
-              descriptions_json+="\n  \"$jpeg\": \"\""
-            done
-            descriptions_json+="\n}"
-            
-            # Write descriptions.json
-            echo "$descriptions_json" > "${dir}/descriptions.json"
-            echo "Generated descriptions.json in $dir"
-            
-            # Delete GEN.PLZ
-            rm "$gen_file"
-            echo "Deleted GEN.PLZ from $dir"
-          done
+        run: node scripts/gen-descriptions.mjs
 
       - name: Generate thumbnails for new images
         run: node scripts/compress-images.mjs --thumbs-only
