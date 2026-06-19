@@ -315,7 +315,7 @@ async function main() {
   }
 
   const index     = await loadIndex();
-  const siteTitle = "My Photography";
+  const siteTitle = "THE LEICA LOOK - A LOBA MIMICKER BLOG";
 
   // Clean + recreate _site
   await fs.rm(SITE_DIR, { recursive: true, force: true });
