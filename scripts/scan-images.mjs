@@ -110,6 +110,35 @@ async function loadDescriptions(dir) {
       console.warn(`  ⚠ Could not parse ${file}: ${err.message}`);
     }
   }
+  
+  // Auto-generate descriptions.json if GEN.PLZ exists
+  const genFile = join(dir, 'GEN.PLZ');
+  if (await exists(genFile)) {
+    // Only generate descriptions.json if the folder has images
+    const entries = await readdir(dir, { withFileTypes: true });
+    const hasImages = entries.some(e => e.isFile() && IMAGE_EXTS.has(extname(e.name)));
+    
+    if (hasImages) {
+      // Ensure all photos have a description entry (blank if not present)
+      const imageEntries = entries
+        .filter(e => e.isFile() && IMAGE_EXTS.has(extname(e.name)))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      
+      let changed = false;
+      for (const e of imageEntries) {
+        if (!(e.name in map)) {
+          map[e.name] = '';
+          changed = true;
+        }
+      }
+      
+      if (changed) {
+        await writeFile(file, JSON.stringify(map, null, 2), 'utf8');
+        console.log(`  📝 Generated descriptions.json (GEN.PLZ detected)`);
+      }
+    }
+  }
+  
   descCache.set(dir, map);
   return map;
 }
