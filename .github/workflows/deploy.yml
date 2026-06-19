@@ -42,6 +42,9 @@ jobs:
           key: gallery-cache
           restore-keys: gallery-
 
+      - name: Generate thumbnails for new images
+        run: node scripts/compress-images.mjs --thumbs-only
+
       - name: Scan images + build site
         run: npm run build
 
