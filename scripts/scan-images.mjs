@@ -34,6 +34,8 @@ const DATA_DIR     = join(ROOT, '_data');
 const GALLERY_DIR  = join(DATA_DIR, 'gallery');
 const INDEX_FILE   = join(GALLERY_DIR, 'index.json');
 
+const EXIF_CACHE_FILE = join(ROOT, '_exif-cache.json');
+
 const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.JPG', '.JPEG']);
 
 // ---------------------------------------------------------------------------
@@ -47,6 +49,25 @@ async function exists(p) {
 function titleCase(slug) {
   return slug.replace(/[-_]+/g, ' ').trim()
     .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// ---------------------------------------------------------------------------
+// EXIF cache — committed file so CI never re-extracts EXIF
+// ---------------------------------------------------------------------------
+
+async function loadExifCache() {
+  try {
+    if (await exists(EXIF_CACHE_FILE)) {
+      return JSON.parse(await readFile(EXIF_CACHE_FILE, 'utf8'));
+    }
+  } catch (err) {
+    console.warn(`  ⚠ Could not parse ${EXIF_CACHE_FILE}: ${err.message}`);
+  }
+  return {};
+}
+
+async function saveExifCache(cache) {
+  await writeFile(EXIF_CACHE_FILE, JSON.stringify(cache, null, 2), 'utf8');
 }
 
 function formatShutter(val) {
@@ -100,20 +121,21 @@ const descCache = new Map();
 async function loadDescriptions(dir) {
   if (descCache.has(dir)) return descCache.get(dir);
   const file = join(dir, 'descriptions.json');
-  let map = {};
+  let raw = {};
   if (await exists(file)) {
     try {
-      const raw = await readFile(file, 'utf8');
-      map = JSON.parse(raw);
-      delete map['_readme'];
+      const parsed = JSON.parse(await readFile(file, 'utf8'));
+      delete parsed['_readme'];
+      raw = parsed;
     } catch (err) {
       console.warn(`  ⚠ Could not parse ${file}: ${err.message}`);
     }
   }
-  
-  // Auto-generate descriptions.json if GEN.PLZ exists
-
-  
+  // Normalise keys to lowercase for case-insensitive matching
+  const map = {};
+  for (const [key, val] of Object.entries(raw)) {
+    map[key.toLowerCase()] = val;
+  }
   descCache.set(dir, map);
   return map;
 }
@@ -173,7 +195,7 @@ async function loadExistingNode(relDir) {
 // Recursive directory walker — incremental per-folder processing
 // ---------------------------------------------------------------------------
 
-async function buildNode(absDir, previousDescriptions) {
+async function buildNode(absDir, previousDescriptions, exifCache) {
   const relDir     = relative(FULLS_DIR, absDir);
   const relDirNorm = relDir === '' ? '' : relDir.split(/[\\/]/).join('/');
   const name       = relDir === '' ? 'Gallery' : titleCase(basename(absDir));
@@ -199,7 +221,7 @@ async function buildNode(absDir, previousDescriptions) {
 
     if (cached) {
       // Reuse — no EXIF extraction needed
-      const desc = folderDescriptions[e.name] ?? cached.description ?? '';
+      const desc = folderDescriptions[e.name.toLowerCase()] ?? cached.description ?? '';
       photos.push(desc !== cached.description ? { ...cached, description: desc } : cached);
       reusedCount++;
       continue;
@@ -216,8 +238,12 @@ async function buildNode(absDir, previousDescriptions) {
       height = meta.height;
     } catch {}
 
-    const exif        = await extractExif(srcPath);
-    const description = folderDescriptions[e.name]
+    let exif = exifCache[relativePath];
+    if (exif === undefined) {
+      exif = await extractExif(srcPath);
+      exifCache[relativePath] = exif;
+    }
+    const description = folderDescriptions[e.name.toLowerCase()]
                      ?? previousDescriptions.get(relativePath)
                      ?? '';
 
@@ -251,7 +277,7 @@ async function buildNode(absDir, previousDescriptions) {
   // Subfolders (recurse)
   const subfolders = [];
   for (const e of entries.filter(e => e.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
-    subfolders.push(await buildNode(join(absDir, e.name), previousDescriptions));
+    subfolders.push(await buildNode(join(absDir, e.name), previousDescriptions, exifCache));
   }
 
   function findCover(photos, subfolders) {
@@ -341,13 +367,19 @@ async function main() {
   // Load ALL existing per-folder data for description preservation
   const previousDescriptions = await loadAllDescriptions();
 
+  // Load committed EXIF cache so CI never re-extracts EXIF
+  const exifCache = await loadExifCache();
+
   console.log('\n🔍  scan-images — incremental scan\n');
 
-  const tree = await buildNode(FULLS_DIR, previousDescriptions);
+  const tree = await buildNode(FULLS_DIR, previousDescriptions, exifCache);
 
   // Write per-folder files + index
   await writeFolderFiles(tree);
   await writeIndex(tree);
+
+  // Save EXIF cache for future CI runs
+  await saveExifCache(exifCache);
 
   // Clean up old monolithic gallery.json if it exists
   const oldFile = join(DATA_DIR, 'gallery.json');

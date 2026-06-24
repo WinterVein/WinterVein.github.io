@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>0 AN ELEGY FOR THE DEATH OF HAMUN · PHOTOLOGUE</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="../../../assets/css/main.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-title" href="../../../index.html">PHOTOLOGUE</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="gallery-page">
+      <div class="gallery-breadcrumb">
+        <a href="../../../gallery/index.html">Gallery</a><span class="gallery-breadcrumb__sep">/</span><a href="../../../gallery/CURATED/index.html">CURATED</a><span class="gallery-breadcrumb__sep">/</span><a href="../../../gallery/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/index.html">0 AN ELEGY FOR THE DEATH OF HAMUN</a>
+      </div>
+      
+    <h1 class="gallery-title">0 AN ELEGY FOR THE DEATH OF HAMUN</h1>
+    <p class="gallery-count">9 photos</p>
+    <div class="square-grid">
+
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/1BRIDGE.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/1BRIDGE.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/1BRIDGE.JPG" alt="1BRIDGE.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/2NABI.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/2NABI.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/2NABI.JPG" alt="2NABI.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/3CHAB.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/3CHAB.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/3CHAB.JPG" alt="3CHAB.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/4REEDS.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/4REEDS.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/4REEDS.JPG" alt="4REEDS.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/5DAM.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/5DAM.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/5DAM.JPG" alt="5DAM.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/6HOV.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/6HOV.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/6HOV.JPG" alt="6HOV.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/7PALM.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/7PALM.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/7PALM.JPG" alt="7PALM.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/8FISH.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/8FISH.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/8FISH.JPG" alt="8FISH.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+    <a class="square square--photo" href="#"
+      data-lightbox-trigger
+      data-full="../../../images/fulls/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/9FAM.JPG"
+      data-thumb="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/9FAM.JPG"
+      data-description=""
+      data-camera=""
+      data-lens=""
+      data-aperture=""
+      data-shutter=""
+      data-iso=""
+      data-focal=""
+      data-date=""
+    >
+      <div class="square__inner">
+        <img src="../../../images/thumbs/CURATED/0.-AN-ELEGY-FOR-THE-DEATH-OF-HAMUN/9FAM.JPG" alt="9FAM.JPG" loading="lazy">
+        <div class="square__overlay square__overlay--photo">
+          
+        </div>
+      </div>
+    </a>
+</div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2026 PHOTOLOGUE</p>
+  </footer>
+
+  <!-- Lightbox markup -->
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <button class="lightbox__close" type="button" aria-label="Close">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="Previous photo">&#8249;</button>
+    <button class="lightbox__nav lightbox__nav--next" type="button" aria-label="Next photo">&#8250;</button>
+    <div class="lightbox__stage">
+      <div class="lightbox__zoom-wrap">
+        <img class="lightbox__image" src="" alt="" draggable="false">
+      </div>
+      <p class="lightbox__hint">Click photo to zoom &middot; hover for details</p>
+    </div>
+    <div class="lightbox__info">
+      <p class="lightbox__description"></p>
+      <dl class="lightbox__exif">
+        <div class="lightbox__exif-item" data-field="camera"><dt>Camera</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="lens"><dt>Lens</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="focal"><dt>Focal Length</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="aperture"><dt>Aperture</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="shutter"><dt>Shutter</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="iso"><dt>ISO</dt><dd></dd></div>
+        <div class="lightbox__exif-item" data-field="date"><dt>Date Taken</dt><dd></dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <script src="../../../assets/js/main.js"></script>
+</body>
+</html>

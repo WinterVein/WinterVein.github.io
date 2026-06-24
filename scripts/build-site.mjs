@@ -18,7 +18,7 @@
 
 import fs   from "node:fs/promises";
 import path from "node:path";
-import { existsSync, cpSync } from "node:fs";
+import { existsSync, cpSync, statSync } from "node:fs";
 
 const ROOT         = process.cwd();
 const GALLERY_DIR  = path.join(ROOT, "_data", "gallery");
@@ -34,6 +34,14 @@ async function copyDir(src, dest) {
   if (!existsSync(src)) return;
   await ensureDir(path.dirname(dest));
   cpSync(src, dest, { recursive: true });
+}
+
+function needsRebuild(folderPath) {
+  const htmlFile = path.join(SITE_DIR, "gallery", folderPath, "index.html");
+  const jsonFile = path.join(GALLERY_DIR, folderPath + ".json");
+  if (!existsSync(htmlFile)) return true;
+  if (!existsSync(jsonFile)) return true;
+  return statSync(jsonFile).mtimeMs > statSync(htmlFile).mtimeMs + 1000;
 }
 
 function esc(str) {
@@ -265,9 +273,11 @@ async function writeGalleryPage(folderPath, siteTitle, isRoot, indexNode) {
 
   await fs.writeFile(path.join(outDir, "index.html"), html, "utf8");
 
-  // Recurse into subfolders
+  // Recurse into subfolders — skip unchanged ones
   for (const sub of subfolders) {
-    await writeGalleryPage(sub.path, siteTitle, false, indexNode);
+    if (needsRebuild(sub.path)) {
+      await writeGalleryPage(sub.path, siteTitle, false, indexNode);
+    }
   }
 }
 
@@ -292,7 +302,7 @@ async function writeIndexPage(siteTitle) {
       <h1 style="font-family:var(--font-display);font-size:clamp(32px,6vw,72px);font-weight:600;letter-spacing:0.04em;text-transform:uppercase;margin:0;">
         ${esc(siteTitle)}
       </h1>
-      <a href="gallery/index.html" class="hero-btn">View Gallery &rarr;</a>
+      <a href="gallery/index.html" class="hero-btn">Look Inside &rarr;</a>
     </div>
   </main>
   <footer class="site-footer">
@@ -315,11 +325,11 @@ async function main() {
   }
 
   const index     = await loadIndex();
-  const siteTitle = "FOTOLOG";
+  const siteTitle = "PHOTOLOGUE";
 
-  // Clean + recreate _site
-  await fs.rm(SITE_DIR, { recursive: true, force: true });
+  // Ensure output directories exist (don't wipe — incremental)
   await ensureDir(SITE_DIR);
+  await ensureDir(path.join(SITE_DIR, "gallery"));
 
   // Copy .nojekyll to disable GitHub Pages Jekyll processing
   const nojekyllSrc = path.join(ROOT, ".nojekyll");
@@ -333,16 +343,11 @@ async function main() {
   // Copy images (thumbs for display, fulls for lightbox)
   await copyDir(path.join(ROOT, "images"), path.join(SITE_DIR, "images"));
 
-  // Generate pages
+  // Always regenerate root pages
   await writeIndexPage(siteTitle);
   await writeGalleryPage("", siteTitle, true, index);
 
-  // Count pages written
-  let pageCount = 1;
-  function countPages(node) { pageCount++; node.subfolders?.forEach(countPages); }
-  countPages(index);
-
-  console.log(`Built ${pageCount} pages → _site/`);
+  console.log(`Built → _site/`);
   console.log(`Run "npm start" to preview at http://localhost:3000`);
 }
 

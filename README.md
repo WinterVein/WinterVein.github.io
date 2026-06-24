@@ -1,4 +1,4 @@
-# Photo Gallery
+# PHOTOLOGUE
 
 Recursive folder photo gallery. Pure Node.js — no Ruby, no Jekyll.
 
