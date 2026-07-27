@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session / Cycle — Study Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- LEFT: total study session -->
+  <section class="panel panel--left" id="leftPanel">
+    <div class="eyebrow"><span class="dot"></span>Total session</div>
+    <h1 class="title">Study time</h1>
+
+    <div class="digits" id="leftDigits">02:00:00</div>
+    <div class="subline" id="leftSub">Set a target, then start.</div>
+
+    <div class="track"><div class="track-fill" id="leftFill"></div></div>
+
+    <div class="setup" id="leftSetup">
+      <input type="number" id="hoursInput" min="0" max="999" value="2" aria-label="Hours"> <span>h</span>
+      <input type="number" id="minsInput" min="0" max="59" value="0" aria-label="Minutes"> <span>m</span>
+      <label class="unlim">
+        <input type="checkbox" id="unlimitedToggle">
+        no limit
+      </label>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="leftStart">Start</button>
+      <button id="leftPause" disabled>Pause</button>
+      <button id="leftReset">Reset</button>
+    </div>
+
+    <div class="blocks" id="blocksSetup">
+      <div class="blocks-label">Study windows <span class="blocks-hint">(hours from start — highlighted on the ruler)</span></div>
+      <div class="blocks-row">
+        <input type="number" id="blockStart" min="0" step="0.5" placeholder="from">
+        <span class="blocks-dash">–</span>
+        <input type="number" id="blockEnd" min="0" step="0.5" placeholder="to">
+        <button type="button" id="addBlock">+ Add</button>
+      </div>
+      <div class="blocks-list" id="blocksList"></div>
+    </div>
+  </section>
+
+  <!-- RULER DIVIDER -->
+  <div class="ruler" id="ruler" aria-hidden="true">
+    <div class="ruler-scroll" id="rulerScroll"></div>
+  </div>
+
+  <!-- RIGHT: continuous pomodoro -->
+  <section class="panel panel--right" id="rightPanel">
+    <div class="eyebrow"><span class="dot"></span><span id="phaseLabel">Focus</span></div>
+    <h1 class="title" id="rightTitle">Pomodoro cycle · 45 / 5</h1>
+
+    <div class="digits" id="rightDigits">45:00</div>
+    <div class="subline" id="rightSub">Runs continuously until you pause it.</div>
+    <div class="cycle-tag" id="cycleTag">0 completed</div>
+
+    <div class="track"><div class="track-fill" id="rightFill"></div></div>
+
+    <div class="setup" id="rightSetup">
+      <input type="number" id="focusInput" min="1" max="180" value="45" aria-label="Focus minutes"> <span>focus</span>
+      <input type="number" id="breakInput" min="1" max="60" value="5" aria-label="Break minutes"> <span>break</span>
+    </div>
+
+    <div class="controls">
+      <button class="primary" id="rightStart">Start</button>
+      <button id="rightPause" disabled>Pause</button>
+      <button id="rightReset">Reset</button>
+    </div>
+  </section>
+
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
