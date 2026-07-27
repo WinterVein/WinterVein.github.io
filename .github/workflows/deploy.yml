@@ -1,8 +1,8 @@
-name: Build and deploy photo gallery
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,9 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+# Only one deployment at a time; cancel in-progress runs on new pushes.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -21,42 +22,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: deps-${{ hashFiles('package-lock.json') }}
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Cache gallery metadata
-        uses: actions/cache@v4
-        with:
-          path: _data/gallery
-          key: gallery-${{ hashFiles('images/fulls/**') }}-${{ hashFiles('**/descriptions.json') }}
+      - name: Build
+        run: npm run build:pages
+        env:
+          OUT_DIR: dist
+          # BASE_PATH is left unset on purpose — build.mjs derives the
+          # correct base path automatically from GITHUB_REPOSITORY.
 
-      - name: Generate thumbnails for new images
-        run: node scripts/compress-images.mjs --thumbs-only
-
-      - name: Scan images + build site
-        run: npm run build
-
-      - name: Save gallery metadata
-        uses: actions/cache@v4
-        with:
-          path: _data/gallery
-          key: gallery-${{ hashFiles('images/fulls/**') }}-${{ hashFiles('**/descriptions.json') }}
-
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
 
   deploy:
     needs: build
